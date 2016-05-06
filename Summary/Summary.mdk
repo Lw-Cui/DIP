@@ -6,10 +6,12 @@ Affiliation   : 哈尔滨工业大学
 Email         : cui@hellolw.com
 Reveal Theme  : solarized
 Beamer Theme  : singapore 
+Package       : [UTF8]ctex
+Locale        : Chinese
 
 [TITLE]
 
-# 病例一
+# 病例A
 ~ Figure { #fig-figure; caption:"Sample1"}
 ![bl0]
 
@@ -17,7 +19,7 @@ Beamer Theme  : singapore
 
 ~
 
-## 病例二
+## 病例B
 ~ Figure { #fig-figure; caption:"Sample"}
 ![bl1]
 
@@ -26,7 +28,7 @@ Beamer Theme  : singapore
 
 
 
-## 病例三
+## 病例C
 ~ Figure { #fig-figure; caption:"Sample"}
 ![bl2]
 
@@ -34,27 +36,26 @@ Beamer Theme  : singapore
 ~
 
 
-## 思路
-* 打开图片
-* 调整图片灰度
-* 进行高斯模糊
-* 使用阀值生成蒙板一
-* 使用中值滤波生成蒙板二
-* 将两个蒙板作用于原始图片
-* 查看效果，调整参数
-{.fragmented}
+## 思路 THINKING
+- {.fragment}打开图片
+- {.fragment}调整图片灰度
+- {.fragment}进行高斯模糊
+- {.fragment}使用阀值生成蒙板一
+- {.fragment}使用中值滤波生成蒙板二
+- {.fragment}将两个蒙板作用于原始图片
+- {.fragment}查看效果，调整参数
 
 ~ Begin Vertical { data-background:Gainsboro }
 
-## 代码展示 {#vertical}
+## 代码展示 CODE SHOW {#vertical}
 
-## 调整灰度并进行高斯模糊
+## A. 调整灰度并进行高斯模糊
 ```java
     CImg<float> src(filename);
     CImg<float> tmp = (src - 100).cut(BLACK, WHITE).blur(2);
 ```
 
-## 生成阀值蒙板
+## B.生成阀值蒙板
 
 Use `columns` to put blocks next to each other:
 ```java
@@ -65,7 +66,7 @@ Use `columns` to put blocks next to each other:
   return mask;
 ```
 
-## 生成中值滤波蒙板
+## C.生成中值滤波蒙板
 ```java
   vector<int> v;
   for (int i = 0; i < LEN; i++) {
@@ -81,7 +82,7 @@ Use `columns` to put blocks next to each other:
   else return BLACK;
 ```
 
-## 应用蒙板，对比展示
+## D.应用蒙板，对比展示
 ```java
     CImg<float> mask = getMask(tmp, getMaskColor),
        mask2 = getMask(tmp, getMaskColor2);

@@ -1,0 +1,98 @@
+[INCLUDE=presentation]
+Title         : Digital Image Processing
+Sub Title     : 电子病例的提取
+Author        : 崔利伟
+Affiliation   : 哈尔滨工业大学
+Email         : cui@hellolw.com
+Reveal Theme  : solarized
+Beamer Theme  : singapore 
+Package       : [UTF8]ctex
+Locale        : Chinese
+
+[TITLE]
+
+# 病例A
+~ Figure { #fig-figure; caption:"Sample1"}
+![bl0]
+
+[bl0]: images/bl0.jpg "bl0" { width:auto; max-width:90% }
+
+~
+
+## 病例B
+~ Figure { #fig-figure; caption:"Sample"}
+![bl1]
+
+[bl1]: images/bl1.jpg "bl1" { width:auto; max-width:90% }
+~
+
+
+
+## 病例C
+~ Figure { #fig-figure; caption:"Sample"}
+![bl2]
+
+[bl2]: images/bl2.jpg "bl2" { width:auto; max-width:90% }
+~
+
+
+## 思路 THINKING
+- {.fragment}打开图片
+- {.fragment}调整图片灰度
+- {.fragment}进行高斯模糊
+- {.fragment}使用阀值生成蒙板一
+- {.fragment}使用中值滤波生成蒙板二
+- {.fragment}将两个蒙板作用于原始图片
+- {.fragment}查看效果，调整参数
+
+~ Begin Vertical { data-background:Gainsboro }
+
+## 代码展示 CODE SHOW {#vertical}
+
+## A. 调整灰度并进行高斯模糊
+```java
+    CImg<float> src(filename);
+    CImg<float> tmp = (src - 100).cut(BLACK, WHITE).blur(2);
+```
+
+## B.生成阀值蒙板
+
+Use `columns` to put blocks next to each other:
+```java
+  CImg<float> mask(p.width(), p.height(), 1, 1);
+  for (int i = 1; i < p.width() - 1; i++)
+    for (int j = 1; j < p.height() - 1; j++)
+      mask(i, j) = c(p, i, j);
+  return mask;
+```
+
+## C.生成中值滤波蒙板
+```java
+  vector<int> v;
+  for (int i = 0; i < LEN; i++) {
+    int sum = 0;
+    for (int k = 0; k < p.spectrum(); k++)
+      sum += p(x + xp[i], y + y[p], k);
+    v.push_back(sum);
+  }
+  sort(v.begin(), v.end());
+  // if the pixel appears black, then the mask is WHITE
+  if (v[LEN / 3 * 2] < 5) return WHITE;
+  else if (v[LEN / 3 * 2] < 20) return (WHITE + BLACK) / 2;
+  else return BLACK;
+```
+
+## D.应用蒙板，对比展示
+```java
+    CImg<float> mask = getMask(tmp, getMaskColor),
+       mask2 = getMask(tmp, getMaskColor2);
+    (src,
+       mask.operator+(src).cut(BLACK, WHITE), 
+       mask2.operator+(src).cut(BLACK, WHITE)).display();
+```
+
+~ End Vertical
+
+## Thanks for looking :-)
+
+

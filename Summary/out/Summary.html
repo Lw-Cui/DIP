@@ -646,6 +646,8 @@
 </li>
 <li class="li ul-li list-dash-li compact-li fragment">使用中值滤波生成蒙板二
 </li>
+<li class="li ul-li list-dash-li compact-li fragment">使用均值算法生成蒙板三
+</li>
 <li class="li ul-li list-dash-li compact-li fragment">将两个蒙板作用于原始图片
 </li>
 <li class="li ul-li list-dash-li compact-li fragment">查看效果，调整参数
@@ -657,16 +659,22 @@
 <section id="sec-first" class="section section2" data-section-depth="2"><h3 id="heading-sec-first" class="h2" data-heading-depth="2" style="display:block">First.调整灰度并进行高斯模糊</h3>
 <pre class="para-block pre-fenced pre-fenced3 language-java lang-java java colorized" style="display:block"><code>    <span style="color:teal">CImg</span>&lt;<span style="color:teal">float</span>&gt; src(filename);
     <span style="color:teal">CImg</span>&lt;<span style="color:teal">float</span>&gt; tmp = (src - <span class="constant" style="color:purple">100</span>).cut(<span style="color:teal">BLACK</span>, <span style="color:teal">WHITE</span>).blur(<span class="constant" style="color:purple">2</span>);</code></pre></section>
-<section id="sec-second" class="section section2" data-section-depth="2"><h3 id="heading-sec-second" class="h2" data-heading-depth="2" style="display:block">Second.生成阀值蒙板</h3>
+<section id="sec-second" class="section section2" data-section-depth="2"><h3 id="heading-sec-second" class="h2" data-heading-depth="2" style="display:block">Second.阀值算法</h3>
 <p class="p noindent">Use <code class="code code1">columns</code> to put blocks next to each other:
 </p>
-<pre class="para-block pre-fenced pre-fenced3 language-java lang-java java colorized" style="display:block"><code>  <span style="color:teal">CImg</span>&lt;<span style="color:teal">float</span>&gt; mask(p.width(), p.height(), <span class="constant" style="color:purple">1</span>, <span class="constant" style="color:purple">1</span>);
-  <span style="color:blue">for</span> (<span style="color:teal">int</span> i = <span class="constant" style="color:purple">1</span>; i &lt; p.width() - <span class="constant" style="color:purple">1</span>; i++)
-    <span style="color:blue">for</span> (<span style="color:teal">int</span> j = <span class="constant" style="color:purple">1</span>; j &lt; p.height() - <span class="constant" style="color:purple">1</span>; j++)
-      mask(i, j) = c(p, i, j);
-  <span style="color:blue">return</span> mask;</code></pre></section>
-<section id="sec-third" class="section section2" data-section-depth="2"><h3 id="heading-sec-third" class="h2" data-heading-depth="2" style="display:block">Third.生成中值滤波蒙板</h3>
-<pre class="para-block pre-fenced pre-fenced3 language-java lang-java java colorized" style="display:block"><code>  vector&lt;<span style="color:teal">int</span>&gt; v;
+<pre class="para-block pre-fenced pre-fenced3 language-java lang-java java colorized" style="display:block"><code>
+unsigned <span style="color:teal">char</span> getMaskColor(<span style="color:teal">CImg</span>&lt;<span style="color:teal">float</span>&gt; &amp;p, <span style="color:teal">int</span> x, <span style="color:teal">int</span> y) {
+  unsigned sum = <span class="constant" style="color:purple">0</span>;
+  <span style="color:blue">for</span> (<span style="color:teal">int</span> k = <span class="constant" style="color:purple">0</span>; k &lt; p.spectrum(); k++)
+    sum += p(x, y, k);
+  <span style="color:darkgreen">// if the pixel appears white, then the mask is BLACK</span>
+  <span style="color:blue">if</span> (sum &gt; <span style="color:teal">THREADHOLD</span>) <span style="color:blue">return</span> <span style="color:teal">BLACK</span>;
+  <span style="color:blue">else</span> <span style="color:blue">return</span> <span style="color:teal">WHITE</span>;
+}
+</code></pre></section>
+<section id="sec-third" class="section section2" data-section-depth="2"><h3 id="heading-sec-third" class="h2" data-heading-depth="2" style="display:block">Third.中值滤波算法</h3>
+<pre class="para-block pre-fenced pre-fenced3 language-java lang-java java colorized" style="display:block"><code>unsigned <span style="color:teal">char</span> getMaskColor2(<span style="color:teal">CImg</span>&lt;<span style="color:teal">float</span>&gt; &amp;p, <span style="color:teal">int</span> x, <span style="color:teal">int</span> y) {
+  vector&lt;<span style="color:teal">int</span>&gt; v;
   <span style="color:blue">for</span> (<span style="color:teal">int</span> i = <span class="constant" style="color:purple">0</span>; i &lt; <span style="color:teal">LEN</span>; i++) {
     <span style="color:teal">int</span> sum = <span class="constant" style="color:purple">0</span>;
     <span style="color:blue">for</span> (<span style="color:teal">int</span> k = <span class="constant" style="color:purple">0</span>; k &lt; p.spectrum(); k++)
@@ -675,15 +683,42 @@
   }
   sort(v.begin(), v.end());
   <span style="color:darkgreen">// if the pixel appears black, then the mask is WHITE</span>
-  <span style="color:blue">if</span> (v[<span style="color:teal">LEN</span> / <span class="constant" style="color:purple">3</span> * <span class="constant" style="color:purple">2</span>] &lt; <span class="constant" style="color:purple">5</span>) <span style="color:blue">return</span> <span style="color:teal">WHITE</span>;
-  <span style="color:blue">else</span> <span style="color:blue">if</span> (v[<span style="color:teal">LEN</span> / <span class="constant" style="color:purple">3</span> * <span class="constant" style="color:purple">2</span>] &lt; <span class="constant" style="color:purple">20</span>) <span style="color:blue">return</span> (<span style="color:teal">WHITE</span> + <span style="color:teal">BLACK</span>) / <span class="constant" style="color:purple">2</span>;
-  <span style="color:blue">else</span> <span style="color:blue">return</span> <span style="color:teal">BLACK</span>;</code></pre></section>
-<section id="sec-forth" class="section section2" data-section-depth="2"><h3 id="heading-sec-forth" class="h2" data-heading-depth="2" style="display:block">Forth.应用蒙板，对比展示</h3>
-<pre class="para-block pre-fenced pre-fenced3 language-java lang-java java colorized" style="display:block"><code>    <span style="color:teal">CImg</span>&lt;<span style="color:teal">float</span>&gt; mask = getMask(tmp, getMaskColor),
-       mask2 = getMask(tmp, getMaskColor2);
-    (src,
+  <span style="color:blue">if</span> (v[<span style="color:teal">LEN</span> / <span class="constant" style="color:purple">3</span> * <span class="constant" style="color:purple">2</span>] &lt; <span style="color:teal">S_THREADHOLD</span>) <span style="color:blue">return</span> <span style="color:teal">WHITE</span>;
+  <span style="color:blue">else</span> <span style="color:blue">if</span> (v[<span style="color:teal">LEN</span> / <span class="constant" style="color:purple">3</span> * <span class="constant" style="color:purple">2</span>] &lt; <span style="color:teal">THREADHOLD</span>) <span style="color:blue">return</span> (<span style="color:teal">WHITE</span> + <span style="color:teal">BLACK</span>) / <span class="constant" style="color:purple">2</span>;
+  <span style="color:blue">else</span> <span style="color:blue">return</span> <span style="color:teal">BLACK</span>;
+}
+
+</code></pre></section>
+<section id="sec-fourth" class="section section2" data-section-depth="2"><h3 id="heading-sec-fourth" class="h2" data-heading-depth="2" style="display:block">Fourth.均值算法</h3>
+<pre class="para-block pre-fenced pre-fenced3 language-java lang-java java colorized" style="display:block"><code>  unsigned <span style="color:teal">char</span> getMaskColor3(<span style="color:teal">CImg</span>&lt;<span style="color:teal">float</span>&gt; &amp;p, <span style="color:teal">int</span> x, <span style="color:teal">int</span> y) {
+  <span style="color:teal">int</span> sum = <span class="constant" style="color:purple">0</span>;
+  <span style="color:blue">for</span> (<span style="color:teal">int</span> i = <span class="constant" style="color:purple">0</span>; i &lt; <span style="color:teal">LEN</span>; i++)
+    <span style="color:blue">for</span> (<span style="color:teal">int</span> k = <span class="constant" style="color:purple">0</span>; k &lt; p.spectrum(); k++)
+      sum += p(x + xp[i], y + y[p], k);
+  sum /= (<span style="color:teal">LEN</span> * p.spectrum());
+  <span style="color:darkgreen">// if the pixel appears black, then the mask is WHITE</span>
+  <span style="color:blue">if</span> (sum &lt; <span style="color:teal">THREADHOLD</span>) <span style="color:blue">return</span> <span style="color:teal">WHITE</span>;
+  <span style="color:blue">else</span> <span style="color:blue">return</span> <span style="color:teal">BLACK</span>;
+}</code></pre></section>
+<section id="sec-fifth" class="section section2" data-section-depth="2"><h3 id="heading-sec-fifth" class="h2" data-heading-depth="2" style="display:block">Fifth.应用蒙板</h3>
+<pre class="para-block pre-fenced pre-fenced3 language-java lang-java java colorized" style="display:block"><code>  <span style="color:teal">CImg</span>&lt;<span style="color:teal">float</span>&gt; getMask(<span style="color:teal">CImg</span>&lt;<span style="color:teal">float</span>&gt; &amp;p, 
+  function&lt;unsigned <span style="color:teal">char</span>(<span style="color:teal">CImg</span>&lt;<span style="color:teal">float</span>&gt; &amp;, <span style="color:teal">int</span>, <span style="color:teal">int</span>)&gt; c) {
+  <span style="color:teal">CImg</span>&lt;<span style="color:teal">float</span>&gt; mask(p.width(), p.height(), <span class="constant" style="color:purple">1</span>, <span class="constant" style="color:purple">1</span>);
+  <span style="color:blue">for</span> (<span style="color:teal">int</span> i = <span class="constant" style="color:purple">1</span>; i &lt; p.width() - <span class="constant" style="color:purple">1</span>; i++)
+    <span style="color:blue">for</span> (<span style="color:teal">int</span> j = <span class="constant" style="color:purple">1</span>; j &lt; p.height() - <span class="constant" style="color:purple">1</span>; j++)
+      mask(i, j) = c(p, i, j);
+  <span style="color:blue">return</span> mask;
+}
+</code></pre></section>
+<section id="sec-fifth" class="section section2" data-section-depth="2"><h3 id="heading-sec-fifth" class="h2" data-heading-depth="2" style="display:block">Fifth.应用蒙板，对比展示</h3>
+<pre class="para-block pre-fenced pre-fenced3 language-java lang-java java colorized" style="display:block"><code>    <span style="color:teal">CImg</span>&lt;<span style="color:teal">float</span>&gt; mask = getMask(blurImg, getMaskColor),
+       mask2 = getMask(blurImg, getMaskColor2),
+       mask3 = getMask(blurImg, getMaskColor3);
+    (src, blurImg,
        mask.operator+(src).cut(<span style="color:teal">BLACK</span>, <span style="color:teal">WHITE</span>), 
-       mask2.operator+(src).cut(<span style="color:teal">BLACK</span>, <span style="color:teal">WHITE</span>)).display();</code></pre></section></section>
+       mask2.operator+(src).cut(<span style="color:teal">BLACK</span>, <span style="color:teal">WHITE</span>),
+       mask3.operator+(src).cut(<span style="color:teal">BLACK</span>, <span style="color:teal">WHITE</span>)).display();
+  }</code></pre></section></section>
 <section id="sec-thanks-for-looking---" class="section section2" data-section-depth="2"><h3 id="heading-sec-thanks-for-looking---" class="h2" data-heading-depth="2" style="display:block">Thanks for looking :-)</h3></section></div></div><span data-line=""></span></div>
 </body>
 <script>

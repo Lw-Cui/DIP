@@ -10,7 +10,7 @@ test: $(SRC_OBJ)
 	$(CC) $< -o $@ $(CXXFLAG) -c
 	
 clean:
-	rm -f test
+	rm -f test *.o
 
 rebuild:	clean test
 

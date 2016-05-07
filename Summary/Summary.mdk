@@ -42,6 +42,7 @@ Locale        : Chinese
 - {.fragment}进行高斯模糊
 - {.fragment}使用阀值生成蒙板一
 - {.fragment}使用中值滤波生成蒙板二
+- {.fragment}使用均值算法生成蒙板三
 - {.fragment}将两个蒙板作用于原始图片
 - {.fragment}查看效果，调整参数
 
@@ -55,19 +56,25 @@ Locale        : Chinese
     CImg<float> tmp = (src - 100).cut(BLACK, WHITE).blur(2);
 ```
 
-## Second.生成阀值蒙板
+## Second.阀值算法
 
 Use `columns` to put blocks next to each other:
 ```java
-  CImg<float> mask(p.width(), p.height(), 1, 1);
-  for (int i = 1; i < p.width() - 1; i++)
-    for (int j = 1; j < p.height() - 1; j++)
-      mask(i, j) = c(p, i, j);
-  return mask;
+
+unsigned char getMaskColor(CImg<float> &p, int x, int y) {
+  unsigned sum = 0;
+  for (int k = 0; k < p.spectrum(); k++)
+    sum += p(x, y, k);
+  // if the pixel appears white, then the mask is BLACK
+  if (sum > THREADHOLD) return BLACK;
+  else return WHITE;
+}
+
 ```
 
-## Third.生成中值滤波蒙板
+## Third.中值滤波算法
 ```java
+unsigned char getMaskColor2(CImg<float> &p, int x, int y) {
   vector<int> v;
   for (int i = 0; i < LEN; i++) {
     int sum = 0;
@@ -77,18 +84,50 @@ Use `columns` to put blocks next to each other:
   }
   sort(v.begin(), v.end());
   // if the pixel appears black, then the mask is WHITE
-  if (v[LEN / 3 * 2] < 5) return WHITE;
-  else if (v[LEN / 3 * 2] < 20) return (WHITE + BLACK) / 2;
+  if (v[LEN / 3 * 2] < S_THREADHOLD) return WHITE;
+  else if (v[LEN / 3 * 2] < THREADHOLD) return (WHITE + BLACK) / 2;
   else return BLACK;
+}
+
+
 ```
 
-## Forth.应用蒙板，对比展示
+## Fourth.均值算法
 ```java
-    CImg<float> mask = getMask(tmp, getMaskColor),
-       mask2 = getMask(tmp, getMaskColor2);
-    (src,
+  unsigned char getMaskColor3(CImg<float> &p, int x, int y) {
+  int sum = 0;
+  for (int i = 0; i < LEN; i++)
+    for (int k = 0; k < p.spectrum(); k++)
+      sum += p(x + xp[i], y + y[p], k);
+  sum /= (LEN * p.spectrum());
+  // if the pixel appears black, then the mask is WHITE
+  if (sum < THREADHOLD) return WHITE;
+  else return BLACK;
+}
+```
+## Fifth.应用蒙板
+```java
+  CImg<float> getMask(CImg<float> &p, 
+  function<unsigned char(CImg<float> &, int, int)> c) {
+  CImg<float> mask(p.width(), p.height(), 1, 1);
+  for (int i = 1; i < p.width() - 1; i++)
+    for (int j = 1; j < p.height() - 1; j++)
+      mask(i, j) = c(p, i, j);
+  return mask;
+}
+
+```
+
+## Fifth.应用蒙板，对比展示
+```java
+    CImg<float> mask = getMask(blurImg, getMaskColor),
+       mask2 = getMask(blurImg, getMaskColor2),
+       mask3 = getMask(blurImg, getMaskColor3);
+    (src, blurImg,
        mask.operator+(src).cut(BLACK, WHITE), 
-       mask2.operator+(src).cut(BLACK, WHITE)).display();
+       mask2.operator+(src).cut(BLACK, WHITE),
+       mask3.operator+(src).cut(BLACK, WHITE)).display();
+  }
 ```
 
 ~ End Vertical

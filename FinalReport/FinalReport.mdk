@@ -7,40 +7,39 @@ Email         : H140311506
 
 
 ~ Abstract
-This is my final report of *Digital Image Processing(G010301000)*, in *Harbin Institute of Technology*. I choose the question 3, *edge detection*.
+This is a final report of *Digital Image Processing(G010301000)* in *Harbin Institute of Technology*. It provides a method to detect edge in an image, which gives an answer to question 3 in final examination. The methods contains three parts.
 ~
 
 [TOC]
 
-# Question Description     { #sec-intro }
-In this question we are required to detect the edges of real apples in Figure 1. It's a color image so it's not easy as gray one.
+# Question Description
+In question 3 we are required to detect the edges of real apples in an image, which shows as Figure 1. 
 ~ Figure { #fig-figure; caption:"Orginal Image"}
 ![图片1]
 ~
 
 [图片1]: images/-1.png "图片1" { width:auto; max-width:90% }
 
-# Big Idea
+# Methods Description
 ## Image Enhancement
-
-As we known It's common to use `RGB` model represent images. `RGB`, which means **R**ed, **G**reen and **B**lue, is easy to process individually. 
+It's easy for us to process it when using `RGB` model represent images. `RGB` model, which means **R**ed, **G**reen and **B**lue components, could be processed individually. So we adjust Green component intensity first and convert it to grayscale image.
 
 ### Intensity Adjacent
-So first we'd like to enhance the color we need and lessen others. In this image green and its similar components play important roles in edge detection, so we'd better adjust the intensity of it using color transformations. Then we need correct image to make green components significantly.
+To enhance origin image we need enhance some color and lessen others. In this image green and its similar components which represent target objects play massively important roles in edge detection, so we'd better adjust the intensity of it using color transformations: we increase its intensity by 10% to correct image to make green components distinguished.
 
 ### Gray Processing 
-During digital image processing gray image is massively important for further processing. So it's better to convert a color image into gray image. To detect real apple in Figure 1 a green component gray image is essential.
+Grayscale image is more easy than color image in further processing. To convert a color image into grayscale one green component is chosen to split color channel and obtain grayscale image.
 
-After gray processing it's necessary to improve image. Calculate image histogram and we could choose a function to strength contrast.
+After gray processing it's necessary to enhance contrast. Calculate image histogram and a suitable function will take care of it.
 
 ## Segmentation
 ### Laplacian Detection
-In this step we try to partition the pixels of an image into groups that strongly correlate with objects, in this image it's real apple. In Figure 1 most lines are curve so some technical such as some masks design for straight cannot work.
+To detect edge we plan to partition the pixels of an image into groups that strongly correlate with objects, in this image it's real apple. We found in Figure 1 most lines are curve so some technical such as masks design for straight cannot work.
 
-We know that any edge is a set of connected pixels that lie on the boundary between two regions, so after image enhancement it's not very difficult for us to use Laplacian edge detection.
+It's known that any edge is a set of connected pixels that lie on the boundary between two regions, so after image enhancement it's not very difficult for us to use some detection algorithms such as Laplacian edge detection.
 
 ### Combiner with Image Smoothing
-In edge detection the problems that there are too much detail always arise. To overcome this image smoothing makes sense. The Laplacian of Gaussian filter uses the Gaussian for noise removal and the Laplacian for edge detection.
+In detection the problems that detail are too much always arise and influence the results. To overcome this we believe image smoothing makes sense. We choose Laplacian of Gaussian filter, which uses the Gaussian for noise removal and the Laplacian for edge detection. The matrix likes this:
 
 ~ Math
  \begin{pmatrix}
@@ -53,4 +52,7 @@ In edge detection the problems that there are too much detail always arise. To o
 ~
 
 ## Contrast stretching 
-Calculating image histogram again and choosing a equalization function to fix the image.
+In this step we calculate image histogram again and choose a equalization function to fix the image for better observation.
+
+# limitation
+The effect of our method depends largely on image quality and complexity. For example the logo on real apples is difficult to recognize in final results. It needs more scientific methods such as pattern recognition and machine learning to combine with.

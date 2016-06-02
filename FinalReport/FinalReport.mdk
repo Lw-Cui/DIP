@@ -5,9 +5,12 @@ Email         : H140311506
 
 [TITLE]
 
+
 ~ Abstract
 This is my final report of *Digital Image Processing(G010301000)*, in *Harbin Institute of Technology*. I choose the question 3, *edge detection*.
 ~
+
+[TOC]
 
 # Question Description     { #sec-intro }
 In this question we are required to detect the edges of real apples in Figure 1. It's a color image so it's not easy as gray one.
@@ -19,14 +22,35 @@ In this question we are required to detect the edges of real apples in Figure 1.
 
 # Big Idea
 ## Image Enhancement
-As we known It's common to use `RGB` model represent images. `RGB`, which means **R**ed, **G**reen and **B**lue, is easy to process individually. So first we'd like to enhance the color we need and lessen others. In this image green and its similar components play important roles in edge detection, so we'd better adjust the intensity of it using color transformations. Then we need correct image to make green components significantly.
 
-## Gray Processing 
+As we known It's common to use `RGB` model represent images. `RGB`, which means **R**ed, **G**reen and **B**lue, is easy to process individually. 
+
+### Intensity Adjacent
+So first we'd like to enhance the color we need and lessen others. In this image green and its similar components play important roles in edge detection, so we'd better adjust the intensity of it using color transformations. Then we need correct image to make green components significantly.
+
+### Gray Processing 
+During digital image processing gray image is massively important for further processing. So it's better to convert a color image into gray image. To detect real apple in Figure 1 a green component gray image is essential.
+
+After gray processing it's necessary to improve image. Calculate image histogram and we could choose a function to strength contrast.
 
 ## Segmentation
+### Laplacian Detection
 In this step we try to partition the pixels of an image into groups that strongly correlate with objects, in this image it's real apple. In Figure 1 most lines are curve so some technical such as some masks design for straight cannot work.
 
-We know that any edge is a set of connected pixels that lie on the boundary between two regions, so after image enhancement it's not very difficult for us to use laplacian edge detection.
+We know that any edge is a set of connected pixels that lie on the boundary between two regions, so after image enhancement it's not very difficult for us to use Laplacian edge detection.
 
-## Contrast Balance
-After detect edge it's necessary to improve image. In this processing a equalization function is indispensable.
+### Combiner with Image Smoothing
+In edge detection the problems that there are too much detail always arise. To overcome this image smoothing makes sense. The Laplacian of Gaussian filter uses the Gaussian for noise removal and the Laplacian for edge detection.
+
+~ Math
+ \begin{pmatrix}
+  0 & 0 &  -1 & 0 & 0 \\
+  0 & -1 &  -2 & -1 & 0 \\
+  -1 & -2 &  16 & -2 & -1 \\
+  0 & 0 &  -1 & 0 & 0 \\
+  0 & -1 &  -2 & -1 & 0
+ \end{pmatrix}
+~
+
+## Contrast stretching 
+Calculating image histogram again and choosing a equalization function to fix the image.

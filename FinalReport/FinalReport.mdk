@@ -1,0 +1,32 @@
+Title         : *Digital Image Processing* Final Report
+Author        : Liwei Cui
+Affiliation   : School of Computer Science and Technology
+Email         : H140311506
+
+[TITLE]
+
+~ Abstract
+This is my final report of *Digital Image Processing(G010301000)*, in *Harbin Institute of Technology*. I choose the question 3, *edge detection*.
+~
+
+# Question Description     { #sec-intro }
+In this question we are required to detect the edges of real apples in Figure 1. It's a color image so it's not easy as gray one.
+~ Figure { #fig-figure; caption:"Orginal Image"}
+![图片1]
+~
+
+[图片1]: images/-1.png "图片1" { width:auto; max-width:90% }
+
+# Big Idea
+## Image Enhancement
+As we known It's common to use `RGB` model represent images. `RGB`, which means **R**ed, **G**reen and **B**lue, is easy to process individually. So first we'd like to enhance the color we need and lessen others. In this image green and its similar components play important roles in edge detection, so we'd better adjust the intensity of it using color transformations. Then we need correct image to make green components significantly.
+
+## Gray Processing 
+
+## Segmentation
+In this step we try to partition the pixels of an image into groups that strongly correlate with objects, in this image it's real apple. In Figure 1 most lines are curve so some technical such as some masks design for straight cannot work.
+
+We know that any edge is a set of connected pixels that lie on the boundary between two regions, so after image enhancement it's not very difficult for us to use laplacian edge detection.
+
+## Contrast Balance
+After detect edge it's necessary to improve image. In this processing a equalization function is indispensable.
